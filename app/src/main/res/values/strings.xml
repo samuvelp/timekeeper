@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Time Keeper</string>
+    <string name="next">next</string>
+    <string name="enter_user_id">enter user id</string>
+    <string name="check_in">Check in</string>
+    <string name="check_out">check out</string>
+    <string name="status">status</string>
+</resources>
