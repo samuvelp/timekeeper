@@ -24,16 +24,17 @@ public class StatusActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
-        HomeActivity homeActivity = new HomeActivity();
+
         ListView LV_status = (ListView) findViewById(R.id.UI_LV_status);
-        ArrayList<HashMap<String,String>> attendanceList = new ArrayList<>();
-        for(int i=0;i<homeActivity.checkIns.size();i++){
+        DBHelper dbHelper = new DBHelper(this);
+        ArrayList<HashMap<String,String>> attendanceList = dbHelper.getAttendance();
+        /*for(int i=0;i<homeActivity.checkIns.size();i++){
             HashMap<String,String> mapAttendance = new HashMap<>();
             mapAttendance.put("mapCheckIns",homeActivity.checkIns.get(i));
             mapAttendance.put("mapCheckOuts",homeActivity.checkOuts.get(i));
             attendanceList.add(mapAttendance);
-        }
-        String[] from = {"mapCheckIns","mapCheckOuts"};
+        }*/
+        String[] from = {"checkInTime","checkoutTime"};
         int[] to = {R.id.UI_TV_checkIn,R.id.UI_TV_checkOut};
         SimpleAdapter simpleAdapter = new SimpleAdapter(getApplication(),attendanceList,R.layout.singlelistview,from,to);
         LV_status.setAdapter(simpleAdapter);

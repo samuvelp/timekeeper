@@ -9,7 +9,8 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:textSize="30sp"/>
+        android:textSize="12sp"
+        android:textColor="#000000"/>
     <TextView
         android:id="@+id/UI_TV_checkOut"
         android:layout_width="0dp"
@@ -17,6 +18,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:textSize="30sp"/>
+        android:textSize="12sp"
+        android:textColor="#000000"/>
 
 </LinearLayout>

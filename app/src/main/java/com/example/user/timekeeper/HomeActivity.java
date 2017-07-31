@@ -1,8 +1,11 @@
 package com.example.user.timekeeper;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -26,15 +29,19 @@ public class HomeActivity extends AppCompatActivity {
         Button btn_checkOut = (Button) findViewById(R.id.UI_BTN_checkOut);
         Button btn_status = (Button) findViewById(R.id.UI_BTN_status);
 
+        final DBHelper dbHelper = new DBHelper(this);
+
+
         btn_checkIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(checkIns.size()==checkOuts.size()){//previously checkdOut or zero checkIns
                     //caputure current time and store it in checkIns arrayList
                     Calendar calendar = Calendar.getInstance();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy h:mm a");
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy h:mm a");
                     String checkInTime = dateFormat.format(calendar.getTime());
-                    checkIns.add(checkInTime);
+                    checkIns.add(checkInTime);//logic purpose doesn't affect memory
+                    dbHelper.insertCheckIn(checkInTime);
                     Toast.makeText(HomeActivity.this,"Your check in time: "+checkInTime, Toast.LENGTH_SHORT).show();
                 }
                 else{
@@ -51,9 +58,10 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 else{
                     Calendar calendar = Calendar.getInstance();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy h:mm a");
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy h:mm a");
                     String checkOutTime = dateFormat.format(calendar.getTime());
-                    checkOuts.add(checkOutTime);
+                    checkOuts.add(checkOutTime);//logic purpose doesn't affect memory
+                    dbHelper.insertCheckOut(checkOutTime);
                     Toast.makeText(HomeActivity.this, "Your check out time: "+checkOutTime, Toast.LENGTH_SHORT).show();
                 }
             }
