@@ -5,4 +5,7 @@
     <string name="check_in">Check in</string>
     <string name="check_out">check out</string>
     <string name="status">status</string>
+    <string name="check_in_time">Check In Time</string>
+    <string name="check_out_time">Check Out Time</string>
+    <string name="location">Location</string>
 </resources>

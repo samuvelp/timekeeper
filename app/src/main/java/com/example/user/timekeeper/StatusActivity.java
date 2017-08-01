@@ -1,9 +1,11 @@
 package com.example.user.timekeeper;
 
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.SimpleCursorAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,15 +30,11 @@ public class StatusActivity extends AppCompatActivity {
         ListView LV_status = (ListView) findViewById(R.id.UI_LV_status);
         DBHelper dbHelper = new DBHelper(this);
         ArrayList<HashMap<String,String>> attendanceList = dbHelper.getAttendance();
-        /*for(int i=0;i<homeActivity.checkIns.size();i++){
-            HashMap<String,String> mapAttendance = new HashMap<>();
-            mapAttendance.put("mapCheckIns",homeActivity.checkIns.get(i));
-            mapAttendance.put("mapCheckOuts",homeActivity.checkOuts.get(i));
-            attendanceList.add(mapAttendance);
-        }*/
-        String[] from = {"checkInTime","checkoutTime"};
-        int[] to = {R.id.UI_TV_checkIn,R.id.UI_TV_checkOut};
+
+        String[] from = {"checkInTime","checkoutTime","location"};
+        int[] to = {R.id.UI_TV_checkIn,R.id.UI_TV_checkOut,R.id.UI_TV_Location};
         SimpleAdapter simpleAdapter = new SimpleAdapter(getApplication(),attendanceList,R.layout.singlelistview,from,to);
         LV_status.setAdapter(simpleAdapter);
+
     }
 }

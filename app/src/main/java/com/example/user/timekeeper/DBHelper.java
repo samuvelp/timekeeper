@@ -20,6 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static String PRIMARY_ID ="primaryId";
     private static String CHECK_IN_TIME ="checkInTime";
     private static String CHECK_OUT_TIME ="checkoutTime";
+    private static String LOCATION ="location";
     public DBHelper(Context context) {
         super(context, DATEBASE_NAME,null,DATABASE_VERSION);
     }
@@ -30,7 +31,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 + TABLE_NAME + "("
                 + PRIMARY_ID + " INTEGER PRIMARY KEY, "
                 + CHECK_IN_TIME + " TEXT, "
-                + CHECK_OUT_TIME + " TEXT"
+                + CHECK_OUT_TIME + " TEXT, "
+                + LOCATION + " TEXT"
                 + " )";
         db.execSQL(CREATE_TABLE);
     }
@@ -54,9 +56,17 @@ public class DBHelper extends SQLiteOpenHelper {
         database.insert(TABLE_NAME,null,contentValues);
         database.close();
     }
+    public void insertLocation(String location){
+        SQLiteDatabase database = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(LOCATION,location);
+        database.insert(TABLE_NAME,null,contentValues);
+        database.close();
+    }
     public ArrayList<HashMap<String,String>> getAttendance(){
         String checkIn ="null";
         String checkOut ="null";
+        String location ="null";
         String query = "SELECT * FROM " + TABLE_NAME ;
         SQLiteDatabase database = this.getWritableDatabase();
         Cursor cursor = database.rawQuery(query,null);
@@ -65,9 +75,11 @@ public class DBHelper extends SQLiteOpenHelper {
             do{
                 checkIn = cursor.getString(cursor.getColumnIndex(CHECK_IN_TIME));
                 checkOut =cursor.getString(cursor.getColumnIndex(CHECK_OUT_TIME));
+                location = cursor.getString(cursor.getColumnIndex(LOCATION));
                 HashMap<String ,String > map = new HashMap<>();
                 map.put(CHECK_IN_TIME,checkIn);
                 map.put(CHECK_OUT_TIME,checkOut);
+                map.put(LOCATION,location);
                 list.add(map);
 
             }while (cursor.moveToNext());
@@ -75,5 +87,11 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
         return  list;
     }
+    /*public Cursor getAttendanceCursor(){
+        String query ="SELECT * FROM " + TABLE_NAME;
+        SQLiteDatabase database = this.getWritableDatabase();
+        Cursor cursor = database.rawQuery(query,null);
+       return cursor;
+    }*/
 
 }
