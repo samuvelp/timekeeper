@@ -30,7 +30,7 @@ public class GPSTracker implements LocationListener {
         boolean isGPSenabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (isGPSenabled) {
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 6000, 10, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             return location;
         }

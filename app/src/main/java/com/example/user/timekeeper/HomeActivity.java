@@ -2,28 +2,44 @@ package com.example.user.timekeeper;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ContextThemeWrapper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
+    private static String TAG ="Timer";
     ArrayList<String> checkIns = new ArrayList<>();
     ArrayList<String> checkOuts = new ArrayList<>();
-
+    Handler handler = new Handler();
+    String startTime=null;
+    //String checkInTime=null;
+    SimpleDateFormat simpleDateFormat;
+    TextView TV_timer,TV_homeCheckIn;
+    long difference = 0L;
+    int sec=0;
+    int min=0;
+    int hour =0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,66 +49,99 @@ public class HomeActivity extends AppCompatActivity {
 
         Button btn_checkIn = (Button) findViewById(R.id.UI_BTN_checkIn);
         Button btn_checkOut = (Button) findViewById(R.id.UI_BTN_checkOut);
-        Button btn_status = (Button) findViewById(R.id.UI_BTN_status);
-
+        TextView btn_status = (TextView) findViewById(R.id.UI_BTN_status);
+        TV_timer = (TextView) findViewById(R.id.UI_TV_timer);
+        TV_homeCheckIn = (TextView) findViewById(R.id.UI_TV_HomeCheckIn);
         final DBHelper dbHelper = new DBHelper(this);
 
+        if (getLastEvent().equals("CheckIn")) {
 
+            startTime = getStartTime();
+            TV_homeCheckIn.setText(startTime);
+            handler.postDelayed(runnable,0);}
         btn_checkIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(checkIns.size()==checkOuts.size()){//previously checkdOut or zero checkIns
-                    //caputure current time and store it in checkIns arrayList
+                    Cursor cursor = dbHelper.getAttendanceCursor();
+                    Log.d("count", String.valueOf(cursor.getCount()));
+                    if(getLastEvent().equals("CheckOut")||cursor.getCount()==0){
                     Calendar calendar = Calendar.getInstance();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy h:mm a");
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
                     String checkInTime = dateFormat.format(calendar.getTime());
-                    checkIns.add(checkInTime);//logic purpose doesn't affect memory
-                    dbHelper.insertCheckIn(checkInTime);
+
+                    Log.d("checkInTIme",checkInTime);
+                    startTime = checkInTime;
+                    TV_homeCheckIn.setText(startTime);
+                        try {
+                            dbHelper.insertCheckIn(startTime,getAddress(13.065165, 80.284961));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        handler.postDelayed(runnable,0);
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
-                    if(location!=null){
+                   /* if(location!=null){
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
 
                         try {
-                            dbHelper.insertLocation(getAddress(latitude,longitude));
+                            dbHelper.insertCheckIn(startTime,getAddress(latitude,longitude));
+
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }
-                    Toast.makeText(HomeActivity.this,"Your check in time: "+checkInTime, Toast.LENGTH_SHORT).show();
+                    }*/
+                    Toast.makeText(HomeActivity.this,"Checked-In", Toast.LENGTH_SHORT).show();
+
                 }
                 else{
                     Toast.makeText(getApplication(), "You have already Checked in!", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 
         btn_checkOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(checkIns.size()==checkOuts.size()){
+
+                if(getLastEvent().equals("CheckOut")){
                     Toast.makeText(HomeActivity.this, "Please check in first", Toast.LENGTH_SHORT).show();
                 }
                 else{
+                    handler.removeCallbacks(runnable);
+                    String hoursWorked = hour +" Hours "+ min +" Minutes "+ sec +" Seconds";
                     Calendar calendar = Calendar.getInstance();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy h:mm a");
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
                     String checkOutTime = dateFormat.format(calendar.getTime());
-                    checkOuts.add(checkOutTime);//logic purpose doesn't affect memory
-                    dbHelper.insertCheckOut(checkOutTime);
+
+                    try {
+                        dbHelper.insertCheckOut(checkOutTime,getAddress(13.065165, 80.284961),hoursWorked);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
-                    if(location!=null){
+                   /* if(location!=null){
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
 
                         try {
-                            dbHelper.insertLocation(getAddress(latitude,longitude));
+                            Cursor cursor = dbHelper.getAttendanceCursor();
+                            cursor.moveToLast();
+                            Integer id = cursor.getColumnIndex("primaryId");
+                            Log.d(TAG,Long.toString(cursor.getLong(id)));
+                           dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude));
+
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }
-                    Toast.makeText(HomeActivity.this, "Your check out time: "+checkOutTime, Toast.LENGTH_SHORT).show();
+                    }*/
+                    Toast.makeText(HomeActivity.this, "Checked-Out", Toast.LENGTH_SHORT).show();
+                    Log.d("pause",hoursWorked);
                 }
             }
         });
@@ -118,7 +167,76 @@ public class HomeActivity extends AppCompatActivity {
         String addressLine2 = addresses.get(0).getAddressLine(1);
         String addressLine3 = addresses.get(0).getAddressLine(2);
 
-        String address = addressLine1 +" "+addressLine2 +"\n"+addressLine3;
+
+        String address;
+        if(addressLine2==null && addressLine3==null)address =addressLine1;
+        else if(addressLine3==null) address = addressLine1 +" "+addressLine2;
+        else address = addressLine1 +" "+addressLine2 +"\n"+addressLine3;
         return address;
+
     }
+    public String getStartTime() {
+
+        DBHelper dbHelper = new DBHelper(this);
+        Cursor cursor = dbHelper.getAttendanceCursor();
+        cursor.moveToLast();
+        return cursor.getString(cursor.getColumnIndex("time"));
+
+    }
+
+    public String getLastEvent() {
+        DBHelper dbHelper = new DBHelper(this);
+        Cursor cursor = dbHelper.getAttendanceCursor();
+
+        if(cursor.getCount()>0){
+            cursor.moveToLast();
+            return cursor.getString(cursor.getColumnIndex("event"));}
+        else return "null";
+
+
+    }
+    Runnable runnable = new Runnable() {
+        public long getDifferenceInMilli(String startTm, String currentTime) throws ParseException {
+            long difference = 0;
+            simpleDateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+            Date dateStart = simpleDateFormat.parse(startTm);
+            Date dateCurrent = simpleDateFormat.parse(currentTime);
+            difference = dateCurrent.getTime() - dateStart.getTime();
+            return difference;
+        }
+
+        public long getSecDifference(long differenceinMilli) {
+            return differenceinMilli / 1000 % 60;
+        }
+
+        public long getMinDifference(long differenceInMilli) {
+            return differenceInMilli / (1000 * 60) % 60;
+        }
+
+        public long getHourDifference(long differenceInMilli) {
+            return differenceInMilli / (1000 * 60 * 60) % 24;
+        }
+
+
+        @Override
+        public void run() {
+            simpleDateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+            Calendar calendar = Calendar.getInstance();
+            String currentTime = simpleDateFormat.format(calendar.getTime());
+            try {
+                difference = getDifferenceInMilli(startTime, currentTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            sec = (int) getSecDifference(difference);
+            min = (int) getMinDifference(difference);
+            hour = (int) getHourDifference(difference);
+
+            TV_timer.setText(" "+hour
+                    +":"+min
+                    +":"+sec);
+            handler.postDelayed(this,0);
+        }
+
+    };
 }
