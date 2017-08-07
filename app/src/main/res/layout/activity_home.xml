@@ -54,7 +54,7 @@
         android:background="@drawable/button_background_green"
         android:text="Check-In"
         android:textColor="#ffffff"
-        android:layout_marginRight="10dp"/>
+        />
     <Button
         android:id="@+id/UI_BTN_checkOut"
         android:layout_width="100dp"
@@ -62,7 +62,8 @@
         android:text="Check-Out"
         android:background="@drawable/button_background_red"
         android:textColor="#ffffff"
-        android:layout_marginLeft="10dp"/>
+        android:visibility="gone"
+        />
 
 
     </LinearLayout>

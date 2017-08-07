@@ -47,8 +47,8 @@ public class HomeActivity extends AppCompatActivity {
         //getting current time
 
 
-        Button btn_checkIn = (Button) findViewById(R.id.UI_BTN_checkIn);
-        Button btn_checkOut = (Button) findViewById(R.id.UI_BTN_checkOut);
+        final Button btn_checkIn = (Button) findViewById(R.id.UI_BTN_checkIn);
+        final Button btn_checkOut = (Button) findViewById(R.id.UI_BTN_checkOut);
         TextView btn_status = (TextView) findViewById(R.id.UI_BTN_status);
         TV_timer = (TextView) findViewById(R.id.UI_TV_timer);
         TV_homeCheckIn = (TextView) findViewById(R.id.UI_TV_HomeCheckIn);
@@ -62,6 +62,8 @@ public class HomeActivity extends AppCompatActivity {
         btn_checkIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                    btn_checkIn.setVisibility(View.GONE);
+                    btn_checkOut.setVisibility(View.VISIBLE);
                     Cursor cursor = dbHelper.getAttendanceCursor();
                     Log.d("count", String.valueOf(cursor.getCount()));
                     if(getLastEvent().equals("CheckOut")||cursor.getCount()==0){
@@ -72,15 +74,15 @@ public class HomeActivity extends AppCompatActivity {
                     Log.d("checkInTIme",checkInTime);
                     startTime = checkInTime;
                     TV_homeCheckIn.setText(startTime);
-                        try {
+                      /*  try {
                             dbHelper.insertCheckIn(startTime,getAddress(13.065165, 80.284961));
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }
-                        handler.postDelayed(runnable,0);
+                        }*/
+
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
-                   /* if(location!=null){
+                   if(location!=null){
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
 
@@ -91,7 +93,8 @@ public class HomeActivity extends AppCompatActivity {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }*/
+                    }
+                    handler.postDelayed(runnable,0);
                     Toast.makeText(HomeActivity.this,"Checked-In", Toast.LENGTH_SHORT).show();
 
                 }
@@ -106,25 +109,28 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
                 if(getLastEvent().equals("CheckOut")){
                     Toast.makeText(HomeActivity.this, "Please check in first", Toast.LENGTH_SHORT).show();
                 }
                 else{
+                    btn_checkIn.setVisibility(View.VISIBLE);
+                    btn_checkOut.setVisibility(View.GONE);
                     handler.removeCallbacks(runnable);
                     String hoursWorked = hour +" Hours "+ min +" Minutes "+ sec +" Seconds";
                     Calendar calendar = Calendar.getInstance();
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
                     String checkOutTime = dateFormat.format(calendar.getTime());
 
-                    try {
+                   /* try {
                         dbHelper.insertCheckOut(checkOutTime,getAddress(13.065165, 80.284961),hoursWorked);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
+                    }*/
 
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
-                   /* if(location!=null){
+                    if(location!=null){
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
 
@@ -133,13 +139,13 @@ public class HomeActivity extends AppCompatActivity {
                             cursor.moveToLast();
                             Integer id = cursor.getColumnIndex("primaryId");
                             Log.d(TAG,Long.toString(cursor.getLong(id)));
-                           dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude));
+                           dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude),hoursWorked);
 
 
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }*/
+                    }
                     Toast.makeText(HomeActivity.this, "Checked-Out", Toast.LENGTH_SHORT).show();
                     Log.d("pause",hoursWorked);
                 }
