@@ -55,47 +55,43 @@ public class HomeActivity extends AppCompatActivity {
         final DBHelper dbHelper = new DBHelper(this);
 
         if (getLastEvent().equals("CheckIn")) {
-
             startTime = getStartTime();
             TV_homeCheckIn.setText(startTime);
-            handler.postDelayed(runnable,0);}
+            btn_checkIn.setVisibility(View.GONE);
+            btn_checkOut.setVisibility(View.VISIBLE);
+            handler.postDelayed(runnable,0);
+        }
         btn_checkIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    btn_checkIn.setVisibility(View.GONE);
-                    btn_checkOut.setVisibility(View.VISIBLE);
+
                     Cursor cursor = dbHelper.getAttendanceCursor();
                     Log.d("count", String.valueOf(cursor.getCount()));
                     if(getLastEvent().equals("CheckOut")||cursor.getCount()==0){
                     Calendar calendar = Calendar.getInstance();
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
                     String checkInTime = dateFormat.format(calendar.getTime());
-
-                    Log.d("checkInTIme",checkInTime);
                     startTime = checkInTime;
-                    TV_homeCheckIn.setText(startTime);
-                      /*  try {
-                            dbHelper.insertCheckIn(startTime,getAddress(13.065165, 80.284961));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }*/
-
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
-                   if(location!=null){
+                    if(location!=null){
+                       btn_checkIn.setVisibility(View.GONE);
+                       btn_checkOut.setVisibility(View.VISIBLE);
+                       TV_homeCheckIn.setText(startTime);
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
-
                         try {
                             dbHelper.insertCheckIn(startTime,getAddress(latitude,longitude));
-
 
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                       handler.postDelayed(runnable,0);
+                       Toast.makeText(HomeActivity.this,"Checked-In", Toast.LENGTH_SHORT).show();
                     }
-                    handler.postDelayed(runnable,0);
-                    Toast.makeText(HomeActivity.this,"Checked-In", Toast.LENGTH_SHORT).show();
+                    if(location==null){
+                        Toast.makeText(getApplicationContext(),"Turn-On GPS to Check-In",Toast.LENGTH_SHORT).show();
+                    }
 
                 }
                 else{
@@ -114,23 +110,18 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(HomeActivity.this, "Please check in first", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    btn_checkIn.setVisibility(View.VISIBLE);
-                    btn_checkOut.setVisibility(View.GONE);
-                    handler.removeCallbacks(runnable);
+
                     String hoursWorked = hour +" Hours "+ min +" Minutes "+ sec +" Seconds";
                     Calendar calendar = Calendar.getInstance();
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
                     String checkOutTime = dateFormat.format(calendar.getTime());
 
-                   /* try {
-                        dbHelper.insertCheckOut(checkOutTime,getAddress(13.065165, 80.284961),hoursWorked);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }*/
-
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
                     if(location!=null){
+                        btn_checkIn.setVisibility(View.VISIBLE);
+                        btn_checkOut.setVisibility(View.GONE);
+                        handler.removeCallbacks(runnable);
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
 
@@ -139,15 +130,19 @@ public class HomeActivity extends AppCompatActivity {
                             cursor.moveToLast();
                             Integer id = cursor.getColumnIndex("primaryId");
                             Log.d(TAG,Long.toString(cursor.getLong(id)));
-                           dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude),hoursWorked);
+                            dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude),hoursWorked);
 
 
-                        } catch (IOException e) {
+                            } catch (IOException e) {
                             e.printStackTrace();
-                        }
+                            }
+                        Toast.makeText(HomeActivity.this, "Checked-Out", Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(HomeActivity.this, "Checked-Out", Toast.LENGTH_SHORT).show();
-                    Log.d("pause",hoursWorked);
+                    if(location==null){
+                        Toast.makeText(getApplicationContext(),"Turn-On GPS to Check-Out",Toast.LENGTH_SHORT).show();
+                    }
+
+
                 }
             }
         });
@@ -157,9 +152,6 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this,StatusActivity.class);
                 startActivity(intent);
-                if(checkIns.isEmpty()){
-                   // Toast.makeText(HomeActivity.this, "There is no history", Toast.LENGTH_SHORT).show();
-                }
 
             }
         });
@@ -238,9 +230,9 @@ public class HomeActivity extends AppCompatActivity {
             min = (int) getMinDifference(difference);
             hour = (int) getHourDifference(difference);
 
-            TV_timer.setText(" "+hour
-                    +":"+min
-                    +":"+sec);
+            TV_timer.setText(" "+String.format("%2d",hour)
+                    +":"+String.format("%02d",min)
+                    +":"+String.format("%02d",sec));
             handler.postDelayed(this,0);
         }
 

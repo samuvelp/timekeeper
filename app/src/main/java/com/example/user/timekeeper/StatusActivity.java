@@ -8,6 +8,7 @@ import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class StatusActivity extends AppCompatActivity {
@@ -35,7 +36,7 @@ public class StatusActivity extends AppCompatActivity {
         DBHelper dbHelper = new DBHelper(this);
         Cursor cursor = dbHelper.getAttendanceCursor();
         ArrayList<HashMap<String,String>> attendanceList = dbHelper.getAttendance();
-
+        Collections.reverse(attendanceList);
         String[] from ={"event","time","location"};
         int[] to ={R.id.UI_TV_Event,R.id.UI_TV_Time,R.id.UI_TV_Location};
         SimpleAdapter simpleAdapter = new SimpleAdapter(getApplication(),attendanceList,R.layout.singlerow_attendance,from,to);
