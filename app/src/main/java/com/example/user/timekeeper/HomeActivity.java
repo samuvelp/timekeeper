@@ -75,22 +75,29 @@ public class HomeActivity extends AppCompatActivity {
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
                     if(location!=null){
-                       btn_checkIn.setVisibility(View.GONE);
-                       btn_checkOut.setVisibility(View.VISIBLE);
-                       TV_homeCheckIn.setText(startTime);
+
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
                         try {
-                            dbHelper.insertCheckIn(startTime,getAddress(latitude,longitude));
-
+                            long isInserted = dbHelper.insertCheckIn(startTime,getAddress(latitude,longitude));
+                            if(isInserted != -1) {
+                                btn_checkIn.setVisibility(View.GONE);
+                                btn_checkOut.setVisibility(View.VISIBLE);
+                                TV_homeCheckIn.setText(startTime);
+                                handler.postDelayed(runnable,0);
+                                Toast.makeText(HomeActivity.this,"Checked-In", Toast.LENGTH_SHORT).show();
+                            }
+                            else if(isInserted == -1){
+                                Toast.makeText(getApplicationContext(),"Try after sometimes",Toast.LENGTH_SHORT).show();
+                            }
                         } catch (IOException e) {
+                            Toast.makeText(getApplicationContext(),"Turn On the internet connection",Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
-                       handler.postDelayed(runnable,0);
-                       Toast.makeText(HomeActivity.this,"Checked-In", Toast.LENGTH_SHORT).show();
+
                     }
                     if(location==null){
-                        Toast.makeText(getApplicationContext(),"Turn-On GPS to Check-In",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"Turn-On location to Check-In",Toast.LENGTH_SHORT).show();
                     }
 
                 }
@@ -119,9 +126,7 @@ public class HomeActivity extends AppCompatActivity {
                     GPSTracker gpsTracker = new GPSTracker(getApplication());
                     Location location = gpsTracker.getLocation();
                     if(location!=null){
-                        btn_checkIn.setVisibility(View.VISIBLE);
-                        btn_checkOut.setVisibility(View.GONE);
-                        handler.removeCallbacks(runnable);
+
                         Double latitude = location.getLatitude();
                         Double longitude = location.getLongitude();
 
@@ -130,16 +135,25 @@ public class HomeActivity extends AppCompatActivity {
                             cursor.moveToLast();
                             Integer id = cursor.getColumnIndex("primaryId");
                             Log.d(TAG,Long.toString(cursor.getLong(id)));
-                            dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude),hoursWorked);
-
-
+                            long isInserted = dbHelper.insertCheckOut(checkOutTime,getAddress(latitude,longitude),hoursWorked);
+                            if(isInserted != -1) {
+                                btn_checkIn.setVisibility(View.VISIBLE);
+                                btn_checkOut.setVisibility(View.GONE);
+                                handler.removeCallbacks(runnable);
+                                Toast.makeText(HomeActivity.this, "Checked-Out", Toast.LENGTH_SHORT).show();
+                            }
+                            else if(isInserted == -1){
+                                Toast.makeText(getApplicationContext(),"Please try after sometimes",Toast.LENGTH_SHORT).show();
+                            }
                             } catch (IOException e) {
+
+                            Toast.makeText(getApplicationContext(),"Turn On the internet connection",Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                             }
-                        Toast.makeText(HomeActivity.this, "Checked-Out", Toast.LENGTH_SHORT).show();
+
                     }
                     if(location==null){
-                        Toast.makeText(getApplicationContext(),"Turn-On GPS to Check-Out",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"Turn-On location to Check-Out",Toast.LENGTH_SHORT).show();
                     }
 
 

@@ -49,27 +49,29 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
-    public void insertCheckIn(String checkIn, String location){
+    public long insertCheckIn(String checkIn, String location){
         SQLiteDatabase database = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(EVENT,"CheckIn");
         contentValues.put(TIME,checkIn);
         contentValues.put(LOCATION,location);
-        database.insert(TABLE_NAME,null,contentValues);
+        long rowInserted =database.insert(TABLE_NAME,null,contentValues);
 
         database.close();
+        return rowInserted;
     }
 
-    public void insertCheckOut(String checkOut,String location,String hoursWorked){
+    public long insertCheckOut(String checkOut,String location,String hoursWorked){
         SQLiteDatabase database = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(EVENT,"CheckOut");
         contentValues.put(TIME,checkOut);
         contentValues.put(LOCATION,location);
         contentValues.put(HOURS_WORKED,hoursWorked);
-        database.insert(TABLE_NAME,null,contentValues);
+        long rowInserted = database.insert(TABLE_NAME,null,contentValues);
 
        database.close();
+        return rowInserted;
     }
 
    public ArrayList<HashMap<String,String>> getAttendance(){

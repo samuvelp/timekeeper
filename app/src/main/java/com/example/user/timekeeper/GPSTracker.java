@@ -16,7 +16,8 @@ import android.widget.Toast;
 
 public class GPSTracker implements LocationListener {
     Context context;
-
+    boolean isGPSenabled;
+    boolean isNetworkenabled;
     public GPSTracker(Context context) {
         this.context = context;
     }
@@ -27,13 +28,20 @@ public class GPSTracker implements LocationListener {
             return null;
         }
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        boolean isGPSenabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (isGPSenabled) {
+        isGPSenabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        isNetworkenabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        if(isNetworkenabled){
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
+            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            return location;
+        }
+         if (isGPSenabled) {
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             return location;
         }
+
         else if(!isGPSenabled){
                 Toast.makeText(context,"Enable GPS",Toast.LENGTH_SHORT);
 
